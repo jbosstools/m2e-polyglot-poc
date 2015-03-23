@@ -20,3 +20,5 @@ Now projects without a polyglot pom should not be impacted
 Now that you've been warned, please read http://takari.io/2015/03/21/polyglot-maven.html to understand how to convert your existing pom.xml files to `pom.<whatever>`.
 
 This screencast shows you how to do it from within Eclipse directly : http://screencast.com/t/ls1In7Uq
+
+So if still want to have fun while loosing your original pom.xml files, you can install `M2E Polyglot Support Experiment` from this p2 update site : `http://dl.bintray.com/jbosstools/m2e-polyglot-poc/`
