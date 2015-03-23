@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: M2E Polyglot Support Experiment UI Plugin Test Fragment
+Bundle-SymbolicName: org.jboss.tools.maven.polyglot.poc.tests
+Bundle-Version: 0.0.1.qualifier
+Fragment-Host: org.jboss.tools.maven.polyglot.poc.core;bundle-version="0.0.1"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Require-Bundle: org.eclipse.jdt.junit4.runtime;bundle-version="1.1.0",
+ org.junit;bundle-version="4.11"
