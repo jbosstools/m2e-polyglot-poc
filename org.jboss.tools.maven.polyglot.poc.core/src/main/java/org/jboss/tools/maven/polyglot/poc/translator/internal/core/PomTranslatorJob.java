@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("restriction")
 public class PomTranslatorJob extends Job {
 
-	private static final Logger LOG = LoggerFactory.getLogger(PomTranslatorJob.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PomTranslatorJob.class);
 
   private static final String TRANSLATION_PROBLEM_TYPE = "mavenPolyglotProblem.translationError";
 
