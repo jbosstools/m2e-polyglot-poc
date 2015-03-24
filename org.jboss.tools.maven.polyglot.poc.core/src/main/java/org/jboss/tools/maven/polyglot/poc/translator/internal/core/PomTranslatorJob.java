@@ -45,103 +45,107 @@ import org.eclipse.m2e.core.project.IMavenProjectRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("restriction")
 public class PomTranslatorJob extends Job {
 
-		private static final String TRANSLATION_PROBLEM_TYPE = "mavenPolyglotProblem.translationError";
+	private static final Logger LOG = LoggerFactory.getLogger(PomTranslatorJob.class);
 
-	private static Logger LOG = LoggerFactory.getLogger(PomTranslatorJob.class);
+  private static final String TRANSLATION_PROBLEM_TYPE = "mavenPolyglotProblem.translationError";
 
-	private static final Pattern LINE_COL_INFO_PATTERN = Pattern.compile("line (\\d+), column");
+  private static final Pattern LINE_COL_INFO_PATTERN = Pattern.compile("line (\\d+), column");
 
-	private List<IFile> poms;
+  private List<IFile> poms;
 
-	private IMavenProjectRegistry projectManager;
+  private IMavenProjectRegistry projectManager;
 
-	private IMavenMarkerManager markerManager;
+  private IMavenMarkerManager markerManager;
 
-	public PomTranslatorJob(IMavenProjectRegistry projectManager, IMavenMarkerManager markerManager, List<IFile> poms) {
-		super("Pom translator");
-		Assert.isNotNull(poms);
-		this.projectManager = projectManager;
-		this.markerManager = markerManager;
-		this.poms = new ArrayList<>(poms);
-	}
+  public PomTranslatorJob(IMavenProjectRegistry projectManager, IMavenMarkerManager markerManager, List<IFile> poms) {
+    super("Pom translator");
+    Assert.isNotNull(poms);
+    this.projectManager = projectManager;
+    this.markerManager = markerManager;
+    this.poms = new ArrayList<>(poms);
+  }
 
-	@Override
-	protected IStatus run(IProgressMonitor monitor) {
-		LOG.debug("Translating "+poms);
-		for (IFile input : poms) {
-			if (monitor.isCanceled()) {
-				break;
-			}
-			try {
-				markerManager.deleteMarkers(input, TRANSLATION_PROBLEM_TYPE);
+  @Override
+  protected IStatus run(IProgressMonitor monitor) {
+    LOG.debug("Translating "+poms);
+    for (IFile input : poms) {
+      if (monitor.isCanceled()) {
+        break;
+      }
+      try {
+        translatePom(input, monitor);
+      } catch (CoreException O_o) {
+        IStatus error = new Status(IStatus.ERROR, PolyglotSupportActivator.PLUGIN_ID, "Unable to translate "+input + " to pom.xml", O_o);
+        return error;
+      }
+    }
+    return Status.OK_STATUS;
+  }
 
-				IProject project = input.getProject();
-				IFile pomXml = project.getFile(IMavenConstants.POM_FILE_NAME);
+  private void translatePom(IFile input, IProgressMonitor monitor) throws CoreException {
+    markerManager.deleteMarkers(input, TRANSLATION_PROBLEM_TYPE);
 
-				IMavenProjectFacade facade = projectManager.create(pomXml, true, monitor);
-				MavenProject mavenProject = facade.getMavenProject(monitor);
+    IProject project = input.getProject();
+    IFile pomXml = project.getFile(IMavenConstants.POM_FILE_NAME);
 
-				IPath polyglotFolder = facade.getProjectRelativePath(mavenProject.getBuild().getDirectory()).append("polyglot");
-				IFile output = project.getFolder(polyglotFolder).getFile(IMavenConstants.POM_FILE_NAME);
-				MavenExecutionResult result = translateToXml(pomXml, input, output, monitor);
-				if (result.hasExceptions()) {
-						for (Throwable O_o : result.getExceptions()) {
-							String msg = O_o.getMessage();
-							Matcher m = LINE_COL_INFO_PATTERN.matcher(msg);
-							if (m.find()) {
-								int line = Integer.parseInt(m.group(1));
-								markerManager.addMarker(input, TRANSLATION_PROBLEM_TYPE, msg, line, IMarker.SEVERITY_ERROR);
+    IMavenProjectFacade facade = projectManager.create(pomXml, true, monitor);
+    MavenProject mavenProject = facade.getMavenProject(monitor);
 
-							} else {
-								markerManager.addErrorMarkers(input, TRANSLATION_PROBLEM_TYPE, O_o);
-							}
+    IPath polyglotFolder = facade.getProjectRelativePath(mavenProject.getBuild().getDirectory()).append("polyglot");
+    IFile output = project.getFolder(polyglotFolder).getFile(IMavenConstants.POM_FILE_NAME);
+    MavenExecutionResult result = translateToXml(pomXml, input, output, monitor);
+    if (result.hasExceptions()) {
+      addErrorMarkers(input, result);
+    } else if (output.exists()) {
+      pomXml.setContents(output.getContents(), true, true, monitor);
+        if (!pomXml.isDerived()) {
+          pomXml.setDerived(true, monitor);
+        }
+    }
+  }
 
-						}
-					} else if (output.exists()) {
-						pomXml.setContents(output.getContents(), true, true, monitor);
-						//output.copy(pomXml.getFullPath(), true, monitor);
-							//pomXml.refreshLocal(IResource.DEPTH_ZERO, monitor);
-						if (!pomXml.isDerived()) {
-							pomXml.setDerived(true, monitor);
-						}
-					}
-			} catch (CoreException O_o) {
-				IStatus error = new Status(IStatus.ERROR, PolyglotSupportActivator.PLUGIN_ID, "Unable to translate "+input + " to pom.xml", O_o);
-				return error;
-			}
-		}
-		return Status.OK_STATUS;
-	}
+  private void addErrorMarkers(IFile input, MavenExecutionResult result) {
+    for (Throwable O_o : result.getExceptions()) {
+      String msg = ""+O_o.getMessage();
+      Matcher m = LINE_COL_INFO_PATTERN.matcher(msg);
+      if (m.find()) {
+        int line = Integer.parseInt(m.group(1));
+        markerManager.addMarker(input, TRANSLATION_PROBLEM_TYPE, msg, line, IMarker.SEVERITY_ERROR);
+      } else {
+        markerManager.addErrorMarkers(input, TRANSLATION_PROBLEM_TYPE, O_o);
+      }
 
-	protected MavenExecutionResult translateToXml(IFile pom, IFile input, IFile output, IProgressMonitor monitor) throws CoreException {
-		final IMaven maven = MavenPlugin.getMaven();
-		IMavenExecutionContext context = maven.createExecutionContext();
-			final MavenExecutionRequest request = context.getExecutionRequest();
-			File pomFile = pom.getRawLocation().toFile();
-			request.setPom(pomFile);//Wow that's retarded in our case!!! pom.xml needs to already exist
-			request.setBaseDirectory(pomFile.getParentFile());
-			request.setGoals(Arrays.asList("io.takari.polyglot:polyglot-translate-plugin:translate"));
-			request.setUpdateSnapshots(false);
-			Properties props = new Properties();
-			props.put("input", input.getRawLocation().toOSString());
-			String rawDestination = output.getRawLocation().toOSString();
-			//TODO set output under target and if no translation errors, copy content to actual pom.xml
-			props.put("output", rawDestination);
-		request.setUserProperties(props);
+    }
+  }
 
-		new File(rawDestination).getParentFile().mkdirs();
+  protected MavenExecutionResult translateToXml(IFile pom, IFile input, IFile output, IProgressMonitor monitor) throws CoreException {
+    final IMaven maven = MavenPlugin.getMaven();
+    IMavenExecutionContext context = maven.createExecutionContext();
+    final MavenExecutionRequest request = context.getExecutionRequest();
+    File pomFile = pom.getRawLocation().toFile();
+    request.setBaseDirectory(pomFile.getParentFile());
+    request.setGoals(Arrays.asList("io.takari.polyglot:polyglot-translate-plugin:translate"));
+    request.setUpdateSnapshots(false);
+    Properties props = new Properties();
+    props.put("input", input.getRawLocation().toOSString());
+    String rawDestination = output.getRawLocation().toOSString();
+    props.put("output", rawDestination);
+    request.setUserProperties(props);
 
-			MavenExecutionResult result = context.execute(new ICallable<MavenExecutionResult>() {
-				public MavenExecutionResult call(IMavenExecutionContext context, IProgressMonitor innerMonitor) throws CoreException {
-				 return ((MavenImpl)maven).lookupComponent(Maven.class)
-						 .execute(request);
-				}
-			}, monitor);
+    new File(rawDestination).getParentFile().mkdirs();
 
-			output.refreshLocal(IResource.DEPTH_ZERO, monitor);
-			return result;
-	}
+    MavenExecutionResult result = context.execute(new ICallable<MavenExecutionResult>() {
+      public MavenExecutionResult call(IMavenExecutionContext context, IProgressMonitor innerMonitor) throws CoreException {
+       return ((MavenImpl)maven).lookupComponent(Maven.class)
+             .execute(request);
+      }
+    }, monitor);
+
+    output.refreshLocal(IResource.DEPTH_ZERO, monitor);
+    return result;
+  }
 
 }

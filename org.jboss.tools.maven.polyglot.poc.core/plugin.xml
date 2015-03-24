@@ -6,4 +6,10 @@
             class="org.jboss.tools.maven.polyglot.poc.translator.internal.core.DummyStartup">
       </startup>
    </extension>
+   <extension point="org.eclipse.core.resources.markers"
+         id="mavenPolyglotProblem.translationError"
+         name="Maven pom Polyglot Problem">
+      <super type="org.eclipse.m2e.core.maven2Problem"/>
+      <persistent value="true"/>
+   </extension>
 </plugin>

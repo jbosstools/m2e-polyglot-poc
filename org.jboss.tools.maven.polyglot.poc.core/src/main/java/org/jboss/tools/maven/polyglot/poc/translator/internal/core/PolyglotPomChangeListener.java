@@ -21,6 +21,7 @@ import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("restriction")
 public class PolyglotPomChangeListener implements IResourceChangeListener {
   
   private static Logger LOG = LoggerFactory.getLogger(PolyglotPomChangeListener.class);
