@@ -16,6 +16,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.m2e.core.MavenPlugin;
+import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +49,7 @@ public class PolyglotPomChangeListener implements IResourceChangeListener {
   protected void requestPomTranslation(List<IFile> poms) {
     if(poms != null && !poms.isEmpty()) {
       LOG.debug("Automatic update of {}", poms);
-      new PomTranslatorJob(poms).schedule();
+      new PomTranslatorJob(MavenPlugin.getMavenProjectRegistry(), MavenPluginActivator.getDefault().getMavenMarkerManager(), poms).schedule();
     }
   }
 }

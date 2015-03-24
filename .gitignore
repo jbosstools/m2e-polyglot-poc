@@ -3,4 +3,5 @@ pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
 pom.xml.next
+.DS_Store
 release.properties

@@ -1,27 +1,34 @@
-/******************************************************************************* 
- * Copyright (c) 2015 Red Hat, Inc. 
- * Distributed under license by Red Hat, Inc. All rights reserved. 
- * This program is made available under the terms of the 
- * Eclipse Public License v1.0 which accompanies this distribution, 
- * and is available at http://www.eclipse.org/legal/epl-v10.html 
- * 
- * Contributors: 
- * Red Hat, Inc. - initial API and implementation 
+/*******************************************************************************
+ * Copyright (c) 2015 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
 package org.jboss.tools.maven.polyglot.poc.translator.internal.core;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.maven.Maven;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
+import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -32,68 +39,109 @@ import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
 import org.eclipse.m2e.core.internal.IMavenConstants;
 import org.eclipse.m2e.core.internal.embedder.MavenImpl;
+import org.eclipse.m2e.core.internal.markers.IMavenMarkerManager;
+import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.eclipse.m2e.core.project.IMavenProjectRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PomTranslatorJob extends Job {
 
-    private static Logger LOG = LoggerFactory.getLogger(PomTranslatorJob.class);
+		private static final String TRANSLATION_PROBLEM_TYPE = "mavenPolyglotProblem.translationError";
+
+	private static Logger LOG = LoggerFactory.getLogger(PomTranslatorJob.class);
+
+	private static final Pattern LINE_COL_INFO_PATTERN = Pattern.compile("line (\\d+), column");
 
 	private List<IFile> poms;
 
-	public PomTranslatorJob(List<IFile> poms) {
+	private IMavenProjectRegistry projectManager;
+
+	private IMavenMarkerManager markerManager;
+
+	public PomTranslatorJob(IMavenProjectRegistry projectManager, IMavenMarkerManager markerManager, List<IFile> poms) {
 		super("Pom translator");
 		Assert.isNotNull(poms);
+		this.projectManager = projectManager;
+		this.markerManager = markerManager;
 		this.poms = new ArrayList<>(poms);
 	}
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		LOG.debug("Translating "+poms);
-		for (IFile source : poms) {
-			IFile destination = source.getProject().getFile(IMavenConstants.POM_FILE_NAME);
+		for (IFile input : poms) {
+			if (monitor.isCanceled()) {
+				break;
+			}
 			try {
-				translateToXml(source, destination, monitor);
+				markerManager.deleteMarkers(input, TRANSLATION_PROBLEM_TYPE);
+
+				IProject project = input.getProject();
+				IFile pomXml = project.getFile(IMavenConstants.POM_FILE_NAME);
+
+				IMavenProjectFacade facade = projectManager.create(pomXml, true, monitor);
+				MavenProject mavenProject = facade.getMavenProject(monitor);
+
+				IPath polyglotFolder = facade.getProjectRelativePath(mavenProject.getBuild().getDirectory()).append("polyglot");
+				IFile output = project.getFolder(polyglotFolder).getFile(IMavenConstants.POM_FILE_NAME);
+				MavenExecutionResult result = translateToXml(pomXml, input, output, monitor);
+				if (result.hasExceptions()) {
+						for (Throwable O_o : result.getExceptions()) {
+							String msg = O_o.getMessage();
+							Matcher m = LINE_COL_INFO_PATTERN.matcher(msg);
+							if (m.find()) {
+								int line = Integer.parseInt(m.group(1));
+								markerManager.addMarker(input, TRANSLATION_PROBLEM_TYPE, msg, line, IMarker.SEVERITY_ERROR);
+
+							} else {
+								markerManager.addErrorMarkers(input, TRANSLATION_PROBLEM_TYPE, O_o);
+							}
+
+						}
+					} else if (output.exists()) {
+						pomXml.setContents(output.getContents(), true, true, monitor);
+						//output.copy(pomXml.getFullPath(), true, monitor);
+							//pomXml.refreshLocal(IResource.DEPTH_ZERO, monitor);
+						if (!pomXml.isDerived()) {
+							pomXml.setDerived(true, monitor);
+						}
+					}
 			} catch (CoreException O_o) {
-				IStatus error = new Status(IStatus.ERROR, PolyglotSupportActivator.PLUGIN_ID, "Unable to translate "+source + " to pom.xml", O_o);
+				IStatus error = new Status(IStatus.ERROR, PolyglotSupportActivator.PLUGIN_ID, "Unable to translate "+input + " to pom.xml", O_o);
 				return error;
 			}
 		}
 		return Status.OK_STATUS;
 	}
 
-	protected void translateToXml(IFile source, IFile destination, IProgressMonitor monitor) throws CoreException {
+	protected MavenExecutionResult translateToXml(IFile pom, IFile input, IFile output, IProgressMonitor monitor) throws CoreException {
 		final IMaven maven = MavenPlugin.getMaven();
 		IMavenExecutionContext context = maven.createExecutionContext();
-	    final MavenExecutionRequest request = context.getExecutionRequest();
-	    request.setPom(destination.getRawLocation().toFile());//Wow that's retarded in our case!!! pom.xml needs to already exist
-	    request.setBaseDirectory(source.getRawLocation().toFile().getParentFile());
-	    request.setGoals(Arrays.asList("io.takari.polyglot:polyglot-translate-plugin:translate"));
-	    request.setUpdateSnapshots(false);
-	    Properties props = new Properties();
-	    props.put("input", source.getRawLocation().toOSString());
-	    //TODO set output under target and if no translation errors, copy content to actual pom.xml
-	    props.put("output", destination.getRawLocation().toOSString());
+			final MavenExecutionRequest request = context.getExecutionRequest();
+			File pomFile = pom.getRawLocation().toFile();
+			request.setPom(pomFile);//Wow that's retarded in our case!!! pom.xml needs to already exist
+			request.setBaseDirectory(pomFile.getParentFile());
+			request.setGoals(Arrays.asList("io.takari.polyglot:polyglot-translate-plugin:translate"));
+			request.setUpdateSnapshots(false);
+			Properties props = new Properties();
+			props.put("input", input.getRawLocation().toOSString());
+			String rawDestination = output.getRawLocation().toOSString();
+			//TODO set output under target and if no translation errors, copy content to actual pom.xml
+			props.put("output", rawDestination);
 		request.setUserProperties(props);
-	    
-	    MavenExecutionResult result = context.execute(new ICallable<MavenExecutionResult>() {
-	      public MavenExecutionResult call(IMavenExecutionContext context, IProgressMonitor innerMonitor) throws CoreException {
-	    	 return ((MavenImpl)maven).lookupComponent(Maven.class)
-	    			 .execute(request);
-	      }
-	    }, monitor);
-	    
-	    if (result.hasExceptions()) {
-	    	for (Throwable O_o : result.getExceptions()) {
-	    		//XXX yeah I know
-	    		O_o.printStackTrace();
-	    	}
-	    }
-	    
-	    if (destination.exists()) {
-	    	destination.refreshLocal(IResource.DEPTH_ZERO, monitor);
-	    	destination.setDerived(true, monitor);
-	    }
+
+		new File(rawDestination).getParentFile().mkdirs();
+
+			MavenExecutionResult result = context.execute(new ICallable<MavenExecutionResult>() {
+				public MavenExecutionResult call(IMavenExecutionContext context, IProgressMonitor innerMonitor) throws CoreException {
+				 return ((MavenImpl)maven).lookupComponent(Maven.class)
+						 .execute(request);
+				}
+			}, monitor);
+
+			output.refreshLocal(IResource.DEPTH_ZERO, monitor);
+			return result;
 	}
 
 }
