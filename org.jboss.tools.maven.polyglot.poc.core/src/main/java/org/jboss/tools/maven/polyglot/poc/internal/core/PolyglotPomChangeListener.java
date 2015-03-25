@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.maven.polyglot.poc.translator.internal.core;
+package org.jboss.tools.maven.polyglot.poc.internal.core;
 
 import java.util.List;
 
@@ -16,8 +16,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.internal.MavenPluginActivator;
+import org.jboss.tools.maven.polyglot.poc.internal.core.preferences.IPolyglotPreferenceConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +27,13 @@ import org.slf4j.LoggerFactory;
 public class PolyglotPomChangeListener implements IResourceChangeListener {
   
   private static Logger LOG = LoggerFactory.getLogger(PolyglotPomChangeListener.class);
+
+  private IEclipsePreferences preferences;
 	
+  PolyglotPomChangeListener(IEclipsePreferences preferences) {
+	  this.preferences = preferences;
+  }
+  
   @Override
   public void resourceChanged(IResourceChangeEvent event) {
     if(isDisabled()) {
@@ -44,7 +52,9 @@ public class PolyglotPomChangeListener implements IResourceChangeListener {
   }
 
   private boolean isDisabled() {
-    return false;
+	boolean isEnabled = preferences
+	                    .getBoolean(IPolyglotPreferenceConstants.ENABLE_AUTOMATIC_POM_TRANSLATION, true);
+    return !isEnabled;
   }
 
   protected void requestPomTranslation(List<IFile> poms) {

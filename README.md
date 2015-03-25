@@ -6,6 +6,8 @@ In the Eclipse IDE though, M2E currently requires a pom.xml file to be able to w
 
 This experimental plugin will allow you to edit any `pom.<groovy|scala|rb|yaml|atom>` and a `pom.xml` file will automatically be (re)generated (and marked as derived), allowing M2E to pick up your changes.
 
+If errors occur during the translation (due to a malformed pom for instance), the pom.xml will not be updated, so the project stays in a buildable form within Eclipse (else you'd get a blank pom.xml file).
+
 There are a few caveats though :
 
 - don't try that with the projects you care too much about, you **will** loose your original pom.xml
@@ -15,7 +17,7 @@ There are a few caveats though :
 - M2E will most likely use a different mechanism to support polyglot Maven
 - did I mention you **will** loose your original pom.xml?
 
-Now projects without a polyglot pom should not be impacted
+Now projects without a polyglot pom should not be impacted. Also, you can always disable the plugin under Preferences > Maven > Polyglot Support (Experimental).
 
 Now that you've been warned, please read http://takari.io/2015/03/21/polyglot-maven.html to understand how to convert your existing pom.xml files to `pom.<whatever>`.
 

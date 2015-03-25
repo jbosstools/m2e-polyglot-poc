@@ -8,12 +8,14 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.maven.polyglot.poc.translator.internal.core;
+package org.jboss.tools.maven.polyglot.poc.internal.core;
 
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Plugin;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -28,6 +30,7 @@ public class PolyglotSupportActivator extends Plugin {
 	private static PolyglotSupportActivator plugin;
 
 	private PolyglotPomChangeListener polyglotPomChangeListener;
+
 	/**
 	 * The constructor
 	 */
@@ -36,12 +39,10 @@ public class PolyglotSupportActivator extends Plugin {
 
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-
-	    IWorkspace workspace = ResourcesPlugin.getWorkspace();
-	    polyglotPomChangeListener = new PolyglotPomChangeListener();
-	    workspace.addResourceChangeListener(polyglotPomChangeListener, IResourceChangeEvent.POST_CHANGE);
-
-		plugin  = this;
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		polyglotPomChangeListener = new PolyglotPomChangeListener(getWorkspacePreferences());
+		workspace.addResourceChangeListener(polyglotPomChangeListener, IResourceChangeEvent.POST_CHANGE);
+		plugin = this;
 	}
 
 	public void stop(BundleContext context) throws Exception {
@@ -49,6 +50,7 @@ public class PolyglotSupportActivator extends Plugin {
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
 			workspace.removeResourceChangeListener(polyglotPomChangeListener);
 		}
+		
 		plugin = null;
 		super.stop(context);
 	}
@@ -58,6 +60,10 @@ public class PolyglotSupportActivator extends Plugin {
 	 */
 	public static PolyglotSupportActivator getDefault() {
 		return plugin;
+	}
+	
+	public IEclipsePreferences getWorkspacePreferences() {
+		return InstanceScope.INSTANCE.getNode(PLUGIN_ID);
 	}
 
 }

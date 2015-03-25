@@ -8,7 +8,7 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
  ******************************************************************************/
-package org.jboss.tools.maven.polyglot.poc.translator.internal.core;
+package org.jboss.tools.maven.polyglot.poc.internal.core;
 
 import java.util.ArrayList;
 import java.util.List;

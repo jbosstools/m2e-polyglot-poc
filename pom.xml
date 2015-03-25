@@ -139,6 +139,7 @@
   </profiles>
   <modules>
     <module>org.jboss.tools.maven.polyglot.poc.core</module>
+    <module>org.jboss.tools.maven.polyglot.poc.ui</module>
     <!--module>org.jboss.tools.maven.polyglot.poc.tests</module-->
     <module>org.jboss.tools.maven.polyglot.poc.feature</module>
     <module>org.jboss.tools.maven.polyglot.poc.site</module>

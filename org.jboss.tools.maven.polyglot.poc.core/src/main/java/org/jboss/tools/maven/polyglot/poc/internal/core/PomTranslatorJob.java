@@ -8,11 +8,12 @@
  * Contributors:
  * Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.maven.polyglot.poc.translator.internal.core;
+package org.jboss.tools.maven.polyglot.poc.internal.core;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -98,8 +99,11 @@ public class PomTranslatorJob extends Job {
     IFile output = project.getFolder(polyglotFolder).getFile(IMavenConstants.POM_FILE_NAME);
     MavenExecutionResult result = translateToXml(pomXml, input, output, monitor);
     if (result.hasExceptions()) {
-      addErrorMarkers(input, result);
-    } else if (output.exists()) {
+      addErrorMarkers(input, result.getExceptions());
+      return;
+    } 
+    
+    if (output.exists()) {
       pomXml.setContents(output.getContents(), true, true, monitor);
         if (!pomXml.isDerived()) {
           pomXml.setDerived(true, monitor);
@@ -107,8 +111,8 @@ public class PomTranslatorJob extends Job {
     }
   }
 
-  private void addErrorMarkers(IFile input, MavenExecutionResult result) {
-    for (Throwable O_o : result.getExceptions()) {
+  private void addErrorMarkers(IFile input, Collection<? extends Throwable> errors) {
+    for (Throwable O_o : errors) {
       String msg = ""+O_o.getMessage();
       Matcher m = LINE_COL_INFO_PATTERN.matcher(msg);
       if (m.find()) {

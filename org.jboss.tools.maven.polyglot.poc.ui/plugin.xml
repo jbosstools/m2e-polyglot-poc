@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.5"?>
+<plugin>
+   <extension point="org.eclipse.ui.startup">
+      <startup
+            class="org.jboss.tools.maven.polyglot.poc.internal.ui.PolyglotSupportUIActivator">
+      </startup>
+   </extension>
+   <extension point="org.eclipse.ui.preferencePages">
+      <page id="org.jboss.tools.maven.polyglot.poc.ui.preferences.MavenPolyglotPreferencePage"
+            category="org.eclipse.m2e.core.preferences.Maven2PreferencePage"
+            class="org.jboss.tools.maven.polyglot.poc.internal.ui.preferences.MavenPolyglotPreferencePage"
+            name="Polyglot Support (Experimental)">
+         <keywordReference id="org.eclipse.m2e.core.maven"/>
+      </page>
+   </extension>
+   <extension point="org.eclipse.core.resources.markers"
+         id="mavenPolyglotProblem.translationError"
+         name="Maven pom Polyglot Problem">
+      <super type="org.eclipse.m2e.core.maven2Problem"/>
+      <persistent value="true"/>
+   </extension>
+</plugin>

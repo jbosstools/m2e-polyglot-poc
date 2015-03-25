@@ -1,14 +1,15 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: M2E Polyglot Support Experiment UI Plugin
+Bundle-Name: M2E Polyglot Support Experiment Core Plugin
 Bundle-SymbolicName: org.jboss.tools.maven.polyglot.poc.core;singleton:=true
 Bundle-Version: 0.0.1.qualifier
-Bundle-Activator: org.jboss.tools.maven.polyglot.poc.translator.internal.core.PolyglotSupportActivator
-Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
+Bundle-Activator: org.jboss.tools.maven.polyglot.poc.internal.core.PolyglotSupportActivator
+Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.m2e.core,
  org.slf4j.api,
  org.eclipse.m2e.maven.runtime
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Export-Package: org.jboss.tools.maven.polyglot.poc.internal.core;x-friends:="org.jboss.tools.maven.polyglot.poc.ui",
+ org.jboss.tools.maven.polyglot.poc.internal.core.preferences;x-friends:="org.jboss.tools.maven.polyglot.poc.ui"
