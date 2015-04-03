@@ -14,5 +14,6 @@
   </license>
 
   <plugin id="org.jboss.tools.maven.polyglot.poc.core" download-size="0" install-size="0" version="0.0.0" unpack="false" />
+  <plugin id="org.jboss.tools.maven.polyglot.poc.ui" download-size="0" install-size="0" version="0.0.0" unpack="false" />
 
 </feature>
