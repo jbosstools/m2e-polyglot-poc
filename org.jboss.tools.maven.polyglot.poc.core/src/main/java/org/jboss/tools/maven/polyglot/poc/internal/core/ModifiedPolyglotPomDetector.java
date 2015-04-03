@@ -32,14 +32,15 @@ public class ModifiedPolyglotPomDetector implements IResourceDeltaVisitor {
 
 	@Override
 	public boolean visit(IResourceDelta delta) throws CoreException {
-
+		boolean added = false;
 		switch (delta.getKind()) {
 		case IResourceDelta.ADDED:
+			added = true;
 		case IResourceDelta.CHANGED:
 			int flags = delta.getFlags();
-			if ((flags & IResourceDelta.CONTENT) != 0) {
+			if (added || (flags & IResourceDelta.CONTENT) != 0) {
 				IResource res = delta.getResource();
-				if (!(res instanceof IFile)) {
+				if (!(res instanceof IFile) || res.isDerived()) {
 					return true;
 				}
 				
@@ -48,7 +49,8 @@ public class ModifiedPolyglotPomDetector implements IResourceDeltaVisitor {
 					return false;
 				}
 
-				if (isPolyglotPom(file)) {
+				if (isAtRoot(file) && 
+						isPolyglotPom(file)) {
 					poms.add(file);
 				}
 				return false;
@@ -58,6 +60,10 @@ public class ModifiedPolyglotPomDetector implements IResourceDeltaVisitor {
 			break;
 		}
 		return false; // visit the children
+	}
+
+	private boolean isAtRoot(IFile file) {
+		return file.getProjectRelativePath().segmentCount() == 1;
 	}
 
 	protected boolean isPolyglotPom(IFile file) {
