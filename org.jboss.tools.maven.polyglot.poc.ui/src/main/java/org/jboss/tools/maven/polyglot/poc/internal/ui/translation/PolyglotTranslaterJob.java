@@ -1,3 +1,13 @@
+/******************************************************************************* 
+ * Copyright (c) 2015 Red Hat, Inc. 
+ * Distributed under license by Red Hat, Inc. All rights reserved. 
+ * This program is made available under the terms of the 
+ * Eclipse Public License v1.0 which accompanies this distribution, 
+ * and is available at http://www.eclipse.org/legal/epl-v10.html 
+ * 
+ * Contributors: 
+ * Red Hat, Inc. - initial API and implementation 
+ ******************************************************************************/
 package org.jboss.tools.maven.polyglot.poc.internal.ui.translation;
 
 import java.io.BufferedWriter;
@@ -26,6 +36,9 @@ import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.jboss.tools.maven.polyglot.poc.internal.core.PomTranslatorJob;
 import org.jboss.tools.maven.polyglot.poc.internal.ui.PolyglotSupportUIActivator;
 
+/**
+ * @author Fred Bricon
+ */
 public class PolyglotTranslaterJob extends PomTranslatorJob {
 
 	private IMavenProjectFacade facade;
@@ -47,9 +60,10 @@ public class PolyglotTranslaterJob extends PomTranslatorJob {
 		try {
 			if (addExtension) {
 				Artifact extension = findLatestExtensionFor(language, monitor);
+				monitor.worked(1);
 				addExtension(mvnExtensionsDir, extension);
+				monitor.worked(1);
 			}
-			monitor.worked(1);
 			translate(facade.getPom(), facade.getPom(), output, monitor);
 			monitor.worked(1);
 		} catch (Exception e) {
@@ -66,7 +80,7 @@ public class PolyglotTranslaterJob extends PomTranslatorJob {
 		mvnExtensionsDir.mkdirs();
 		File mvnExtension = new File(mvnExtensionsDir, "extensions.xml");
 		Xpp3Dom dom = null;
-		if (mvnExtension.exists()) {
+		if (mvnExtension.exists()) {//TODO could make check more robust
 			try (FileInputStream fis = new FileInputStream(mvnExtension)) {
 				dom = new Xpp3DomBuilder().build(fis, "UTF-8");
 			}
@@ -85,20 +99,11 @@ public class PolyglotTranslaterJob extends PomTranslatorJob {
 			}
 		}
 		Xpp3Dom newExtension = new Xpp3Dom("extension");
-		Xpp3Dom aid = new Xpp3Dom("artifactId");
-		newExtension.addChild(aid);
-		
-		aid.setValue(extension.getArtifactId());
-		Xpp3Dom gid = new Xpp3Dom("groupId");
-		newExtension.addChild(gid);
-		
-		gid.setValue(extension.getGroupId());
-		Xpp3Dom version = new Xpp3Dom("version");
-		version.setValue(extension.getVersion());
-		newExtension.addChild(version);
-		
-		
+		addNode(newExtension, "groupId", extension.getGroupId());
+		addNode(newExtension, "artifactId", extension.getArtifactId());
+		addNode(newExtension, "version", extension.getVersion());
 		dom.addChild(newExtension);
+		
 		try (Writer writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(mvnExtension),"UTF-8")))) {
 			Xpp3DomWriter.write(new PrettyPrintXMLWriter(writer), dom);
 		}
@@ -108,6 +113,12 @@ public class PolyglotTranslaterJob extends PomTranslatorJob {
 		Artifact extension = new DefaultArtifact("io.takari.polyglot", "polyglot-"+language, "jar", "0.1.13");
 		//TODO search for latest version
 		return extension;
+	}
+	
+	private static void addNode(Xpp3Dom parent, String key, String value) {
+		Xpp3Dom node = new Xpp3Dom(key);
+		node.setValue(value);
+		parent.addChild(node);
 	}
 
 }

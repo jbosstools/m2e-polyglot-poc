@@ -1,3 +1,13 @@
+/******************************************************************************* 
+ * Copyright (c) 2015 Red Hat, Inc. 
+ * Distributed under license by Red Hat, Inc. All rights reserved. 
+ * This program is made available under the terms of the 
+ * Eclipse Public License v1.0 which accompanies this distribution, 
+ * and is available at http://www.eclipse.org/legal/epl-v10.html 
+ * 
+ * Contributors: 
+ * Red Hat, Inc. - initial API and implementation 
+ ******************************************************************************/
 package org.jboss.tools.maven.polyglot.poc.internal.ui.translation;
 
 import java.io.File;
@@ -11,11 +21,11 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-class PolyglotTranslaterWizardPage extends WizardPage {
+/**
+ * @author Fred Bricon
+ */
+public class PolyglotTranslaterWizardPage extends WizardPage {
 
-	private IMavenProjectFacade facade;
-
-	private String language;
 	private boolean addExtension = true;
 	private File mvnExtensionsDir;
 
@@ -36,7 +46,6 @@ class PolyglotTranslaterWizardPage extends WizardPage {
 	protected PolyglotTranslaterWizardPage(IMavenProjectFacade facade) {
 		super("Translate Project to Polyglot Maven");
 		setTitle("Translate "+facade.getProject().getName() + " to Polyglot Maven");
-		this.facade = facade;
 		mvnExtensionsDir = new File(facade.getPomFile().getParentFile(), ".mvn");
 	}
 

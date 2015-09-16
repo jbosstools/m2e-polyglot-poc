@@ -25,6 +25,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+/**
+ * @author Fred Bricon
+ */
 public class TranslateToPolyglotProjectHandler extends AbstractHandler {
 
 	@Override
