@@ -8,6 +8,8 @@ This experimental plugin will allow you to edit any `pom.<groovy|scala|rb|yaml|a
 
 If errors occur during the translation (due to a malformed pom for instance), the pom.xml will not be updated, so the project stays in a buildable form within Eclipse (else you'd get a blank pom.xml file).
 
+You can now convert an existing Maven project to Polyglot Maven via right-click on a project and `Configure > Convert to Maven Polyglot...`
+
 There are a few caveats though :
 
 - don't try that with the projects you care too much about, you **will** loose your original pom.xml

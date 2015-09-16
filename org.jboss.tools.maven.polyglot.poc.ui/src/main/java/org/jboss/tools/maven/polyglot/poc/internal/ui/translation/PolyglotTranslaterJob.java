@@ -27,6 +27,7 @@ import org.codehaus.plexus.util.xml.Xpp3DomWriter;
 import org.eclipse.aether.artifact.Artifact;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -65,6 +66,7 @@ public class PolyglotTranslaterJob extends PomTranslatorJob {
 				monitor.worked(1);
 			}
 			translate(facade.getPom(), facade.getPom(), output, monitor);
+			facade.getProject().refreshLocal(IResource.DEPTH_INFINITE, monitor);
 			monitor.worked(1);
 		} catch (Exception e) {
 			e.printStackTrace();
