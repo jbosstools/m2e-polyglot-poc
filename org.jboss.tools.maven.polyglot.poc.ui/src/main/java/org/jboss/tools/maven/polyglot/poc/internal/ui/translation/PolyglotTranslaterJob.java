@@ -42,11 +42,11 @@ import org.jboss.tools.maven.polyglot.poc.internal.ui.PolyglotSupportUIActivator
 public class PolyglotTranslaterJob extends PomTranslatorJob {
 
 	private IMavenProjectFacade facade;
-	private String language;
+	private Language language;
 	private boolean addExtension;
 	private File mvnExtensionsDir;
 
-	public PolyglotTranslaterJob(IMavenProjectFacade facade, String language, boolean addExtension, File mvnExtensionsDir) {
+	public PolyglotTranslaterJob(IMavenProjectFacade facade, Language language, boolean addExtension, File mvnExtensionsDir) {
 		super(Collections.singletonList(facade.getPom()));
 		this.facade = facade;
 		this.language = language;
@@ -56,10 +56,10 @@ public class PolyglotTranslaterJob extends PomTranslatorJob {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		IFile output = facade.getPom().getParent().getFile(new Path("pom."+language));
+		IFile output = facade.getPom().getParent().getFile(new Path("pom."+language.getFileExtension()));
 		try {
 			if (addExtension) {
-				Artifact extension = findLatestExtensionFor(language, monitor);
+				Artifact extension = findLatestExtensionFor(language.getMavenPluginId(), monitor);
 				monitor.worked(1);
 				addExtension(mvnExtensionsDir, extension);
 				monitor.worked(1);
@@ -82,10 +82,10 @@ public class PolyglotTranslaterJob extends PomTranslatorJob {
 		Xpp3Dom dom = null;
 		if (mvnExtension.exists()) {//TODO could make check more robust
 			try (FileInputStream fis = new FileInputStream(mvnExtension)) {
-				dom = new Xpp3DomBuilder().build(fis, "UTF-8");
+				dom = Xpp3DomBuilder.build(fis, "UTF-8");
 			}
 		} else {
-			dom = new Xpp3DomBuilder().build(new StringReader("<extensions>\n</extensions>"));
+			dom = Xpp3DomBuilder.build(new StringReader("<extensions>\n</extensions>"));
 		}
 		Xpp3Dom[] extensions = dom.getChildren("extension");
 		if (extensions != null && extensions.length > 0) {
@@ -109,8 +109,8 @@ public class PolyglotTranslaterJob extends PomTranslatorJob {
 		}
 	}
 
-	private Artifact findLatestExtensionFor(String language, IProgressMonitor monitor) {
-		Artifact extension = new DefaultArtifact("io.takari.polyglot", "polyglot-"+language, "jar", "0.1.13");
+	private Artifact findLatestExtensionFor(String pluginId, IProgressMonitor monitor) {
+		Artifact extension = new DefaultArtifact("io.takari.polyglot", pluginId, "jar", "0.1.13");
 		//TODO search for latest version
 		return extension;
 	}

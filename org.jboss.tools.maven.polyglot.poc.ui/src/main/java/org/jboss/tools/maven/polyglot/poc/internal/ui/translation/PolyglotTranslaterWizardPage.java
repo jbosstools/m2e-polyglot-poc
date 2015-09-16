@@ -11,6 +11,8 @@
 package org.jboss.tools.maven.polyglot.poc.internal.ui.translation;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
@@ -39,8 +41,8 @@ public class PolyglotTranslaterWizardPage extends WizardPage {
 		return mvnExtensionsDir;
 	}
 	
-	public String getLanguage() {
-		return languagesCombo.getText();
+	public Language getLanguage() {
+		return Language.valueOf(languagesCombo.getText());
 	}
 	
 	protected PolyglotTranslaterWizardPage(IMavenProjectFacade facade) {
@@ -57,9 +59,9 @@ public class PolyglotTranslaterWizardPage extends WizardPage {
 		
 		Label lblTranslateProjectTo = new Label(container, SWT.NONE);
 		lblTranslateProjectTo.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-		lblTranslateProjectTo.setText("Translate project to");
+		lblTranslateProjectTo.setText("Translate project pom.xml to");
 		
-		languagesCombo = new Combo(container, SWT.NONE);
+		languagesCombo = new Combo(container, SWT.READ_ONLY);
 		GridData gd_combo = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		gd_combo.widthHint = 100;
 		languagesCombo.setLayoutData(gd_combo);
@@ -83,6 +85,10 @@ public class PolyglotTranslaterWizardPage extends WizardPage {
 	}
 
 	private String[] getLanguages() {
-		return new String[] {"atom", "clojure", "groovy", "scala", "yaml"};
+		return Arrays.asList(Language.values())
+				.stream()
+				.map(lang -> lang.name())
+				.collect(Collectors.toList())
+				.toArray(new String[Language.values().length]);
 	}
 }

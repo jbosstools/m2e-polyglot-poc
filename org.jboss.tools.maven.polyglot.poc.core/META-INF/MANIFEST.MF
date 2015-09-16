@@ -10,6 +10,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.slf4j.api,
  org.eclipse.m2e.maven.runtime
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: org.jboss.tools.maven.polyglot.poc.internal.core;x-friends:="org.jboss.tools.maven.polyglot.poc.ui",
  org.jboss.tools.maven.polyglot.poc.internal.core.preferences;x-friends:="org.jboss.tools.maven.polyglot.poc.ui"

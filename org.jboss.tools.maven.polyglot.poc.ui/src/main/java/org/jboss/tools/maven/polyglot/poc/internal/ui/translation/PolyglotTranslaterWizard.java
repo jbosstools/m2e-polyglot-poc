@@ -40,7 +40,7 @@ public class PolyglotTranslaterWizard extends Wizard {
 
 	@Override
 	public boolean performFinish() {
-		final String language = translaterPage.getLanguage();
+		final Language language = translaterPage.getLanguage();
 		final boolean isAddExtension = translaterPage.isAddExtension();
 		final File mvnExtensionsDir = translaterPage.getMvnExtensionsDir(); 
 		IRunnableWithProgress op = new IRunnableWithProgress() {
