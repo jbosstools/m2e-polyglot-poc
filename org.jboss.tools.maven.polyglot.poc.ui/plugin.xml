@@ -20,4 +20,43 @@
       <super type="org.eclipse.m2e.core.maven2Problem"/>
       <persistent value="true"/>
    </extension>
+   <extension
+          point="org.eclipse.ui.menus">
+       <menuContribution
+             allPopups="false"
+             locationURI="popup:org.eclipse.ui.projectConfigure">
+          <command
+                commandId="org.jboss.tools.maven.polyglot.poc.ui.translateproject"
+                style="push">
+             <visibleWhen
+                   checkEnabled="false">
+                <!--
+                <and>
+                   <adapt
+                         type="org.eclipse.core.resources.IProject">
+                          <test
+                                property="org.eclipse.core.resources.projectNature"
+                                value="org.eclipse.m2e.core.maven2Nature">
+                          </test>
+                       </adapt>
+                </and>
+                -->
+             </visibleWhen>
+          </command>
+       </menuContribution>
+     </extension>
+     <extension
+          point="org.eclipse.ui.commands">
+      <command
+            id="org.jboss.tools.maven.polyglot.poc.ui.translateproject"
+            name="Convert to Maven Polyglot...">
+      </command>
+      </extension>
+          <extension
+          point="org.eclipse.ui.handlers">
+      <handler
+            class="org.jboss.tools.maven.polyglot.poc.internal.ui.translation.TranslateToPolyglotProjectHandler"
+            commandId="org.jboss.tools.maven.polyglot.poc.ui.translateproject">
+      </handler>
+    </extension>  
 </plugin>

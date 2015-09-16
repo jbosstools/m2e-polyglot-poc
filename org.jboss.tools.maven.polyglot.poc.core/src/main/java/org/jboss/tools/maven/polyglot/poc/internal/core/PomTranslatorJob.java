@@ -39,6 +39,7 @@ import org.eclipse.m2e.core.embedder.ICallable;
 import org.eclipse.m2e.core.embedder.IMaven;
 import org.eclipse.m2e.core.embedder.IMavenExecutionContext;
 import org.eclipse.m2e.core.internal.IMavenConstants;
+import org.eclipse.m2e.core.internal.MavenPluginActivator;
 import org.eclipse.m2e.core.internal.embedder.MavenImpl;
 import org.eclipse.m2e.core.internal.markers.IMavenMarkerManager;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
@@ -61,6 +62,11 @@ public class PomTranslatorJob extends Job {
 
   private IMavenMarkerManager markerManager;
 
+  
+  public PomTranslatorJob(List<IFile> poms) {
+	  this(MavenPlugin.getMavenProjectRegistry(), MavenPluginActivator.getDefault().getMavenMarkerManager(), poms);
+  }
+  
   public PomTranslatorJob(IMavenProjectRegistry projectManager, IMavenMarkerManager markerManager, List<IFile> poms) {
     super("Pom translator");
     Assert.isNotNull(poms);
@@ -97,7 +103,7 @@ public class PomTranslatorJob extends Job {
 
     IPath polyglotFolder = facade.getProjectRelativePath(mavenProject.getBuild().getDirectory()).append("polyglot");
     IFile output = project.getFolder(polyglotFolder).getFile(IMavenConstants.POM_FILE_NAME);
-    MavenExecutionResult result = translateToXml(pomXml, input, output, monitor);
+    MavenExecutionResult result = translate(pomXml, input, output, monitor);
     if (result.hasExceptions()) {
       addErrorMarkers(input, result.getExceptions());
       return;
@@ -125,7 +131,7 @@ public class PomTranslatorJob extends Job {
     }
   }
 
-  protected MavenExecutionResult translateToXml(IFile pom, IFile input, IFile output, IProgressMonitor monitor) throws CoreException {
+  protected MavenExecutionResult translate(IFile pom, IFile input, IFile output, IProgressMonitor monitor) throws CoreException {
     final IMaven maven = MavenPlugin.getMaven();
     IMavenExecutionContext context = maven.createExecutionContext();
     final MavenExecutionRequest request = context.getExecutionRequest();
