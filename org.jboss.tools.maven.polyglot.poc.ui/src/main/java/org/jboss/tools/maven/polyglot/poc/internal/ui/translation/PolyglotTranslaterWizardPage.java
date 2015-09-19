@@ -67,21 +67,6 @@ public class PolyglotTranslaterWizardPage extends WizardPage {
 		languagesCombo.setLayoutData(gd_combo);
 		languagesCombo.setItems(getLanguages());
 		languagesCombo.setText(languagesCombo.getItem(0));
-		/*
-		Label lblAddExtensionTo = new Label(container, SWT.NONE);
-		lblAddExtensionTo.setText("Add extension to .mvn directory");
-		
-		Button btnAddExtensionTo = new Button(container, SWT.CHECK);
-		
-		Label lblmvnDirectory = new Label(container, SWT.NONE);
-		lblmvnDirectory.setText(".mvn directory");
-		new Label(container, SWT.NONE);
-		btnAddExtensionTo.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-			}
-		});
-		*/
 	}
 
 	private String[] getLanguages() {

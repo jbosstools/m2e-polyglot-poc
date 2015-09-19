@@ -27,7 +27,7 @@ public enum Language {
 
 	Language() {
 		this.fileExtension = name();
-		this.mavenPluginId = "takari-polyglot-"+name();
+		this.mavenPluginId = "polyglot-"+name();
 	}
 	
 	Language(String extension) {
