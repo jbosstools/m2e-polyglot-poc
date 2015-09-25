@@ -23,12 +23,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DefaultArtifact;
 import org.codehaus.plexus.util.xml.PrettyPrintXMLWriter;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
 import org.codehaus.plexus.util.xml.Xpp3DomWriter;
-import org.eclipse.aether.artifact.Artifact;
-import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.jboss.tools.maven.polyglot.poc.internal.core.ArtifactSearcher;
 import org.jboss.tools.maven.polyglot.poc.internal.core.ModulesCollector;
 import org.jboss.tools.maven.polyglot.poc.internal.core.PomTranslatorJob;
 import org.jboss.tools.maven.polyglot.poc.internal.ui.PolyglotSupportUIActivator;
@@ -125,8 +126,15 @@ public class PolyglotTranslaterJob extends PomTranslatorJob {
 	}
 
 	private Artifact findLatestExtensionFor(String pluginId, IProgressMonitor monitor) {
-		Artifact extension = new DefaultArtifact("io.takari.polyglot", pluginId, "jar", "0.1.13");
-		//TODO search for latest version
+		Artifact extension = new DefaultArtifact("io.takari.polyglot", pluginId, "0.1.12", null, "jar", "", null);
+		try {
+			String latestVersion = ArtifactSearcher.getLatestVersion(extension);
+			if (latestVersion != null) {
+			  extension.setVersion(latestVersion);
+			}
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
 		return extension;
 	}
 	
