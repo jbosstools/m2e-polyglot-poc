@@ -18,7 +18,10 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import org.codehaus.plexus.util.xml.PrettyPrintXMLWriter;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
@@ -33,7 +36,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.jboss.tools.maven.polyglot.poc.internal.core.ModulesCollector;
 import org.jboss.tools.maven.polyglot.poc.internal.core.PomTranslatorJob;
 import org.jboss.tools.maven.polyglot.poc.internal.ui.PolyglotSupportUIActivator;
 
@@ -57,7 +62,6 @@ public class PolyglotTranslaterJob extends PomTranslatorJob {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		IFile output = facade.getPom().getParent().getFile(new Path("pom."+language.getFileExtension()));
 		try {
 			if (addExtension) {
 				Artifact extension = findLatestExtensionFor(language.getMavenPluginId(), monitor);
@@ -65,9 +69,18 @@ public class PolyglotTranslaterJob extends PomTranslatorJob {
 				addExtension(mvnExtensionsDir, extension);
 				monitor.worked(1);
 			}
-			translate(facade.getPom(), facade.getPom(), output, monitor);
-			facade.getProject().refreshLocal(IResource.DEPTH_INFINITE, monitor);
-			monitor.worked(1);
+			
+			IMavenProjectFacade[] allFacades = MavenPlugin.getMavenProjectRegistry().getProjects();
+			Set<IMavenProjectFacade> modules = new ModulesCollector(facade, allFacades).getModules(monitor);
+			List<IMavenProjectFacade> facades = new ArrayList<>(modules.size()+1);
+			facades.add(facade);
+			facades.addAll(modules);
+			for (IMavenProjectFacade f : facades) {
+				IFile output = f.getPom().getParent().getFile(new Path("pom."+language.getFileExtension()));
+				translate(f.getPom(), f.getPom(), output, monitor);
+				facade.getProject().refreshLocal(IResource.DEPTH_ZERO, monitor);
+				monitor.worked(1);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			if (e instanceof CoreException) {
