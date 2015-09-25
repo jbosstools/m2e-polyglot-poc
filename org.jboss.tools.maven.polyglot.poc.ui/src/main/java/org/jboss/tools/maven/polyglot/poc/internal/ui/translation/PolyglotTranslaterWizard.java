@@ -30,6 +30,7 @@ public class PolyglotTranslaterWizard extends Wizard {
 
 	public PolyglotTranslaterWizard(IMavenProjectFacade facade) {
 		this.facade = facade;
+		setNeedsProgressMonitor(true);
 	}
 
 	@Override

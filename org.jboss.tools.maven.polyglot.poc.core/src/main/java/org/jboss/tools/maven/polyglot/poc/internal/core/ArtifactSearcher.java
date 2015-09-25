@@ -7,6 +7,7 @@ import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.repository.legacy.metadata.ArtifactMetadataSource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.embedder.IMaven;
@@ -17,7 +18,8 @@ public class ArtifactSearcher {
 	private ArtifactSearcher() {
 	}
 	
-	public static String getLatestVersion(Artifact artifact) throws CoreException {
+	public static String getLatestVersion(Artifact artifact, IProgressMonitor monitor) throws CoreException {
+			monitor.beginTask("Getting latest version for "+artifact.getGroupId()+":"+ artifact.getArtifactId(), 1);
 	        try {
 	            final IMaven maven = MavenPlugin.getMaven();
 	            final ArtifactMetadataSource source = ((MavenImpl) maven).getPlexusContainer().lookup(

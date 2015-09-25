@@ -128,7 +128,7 @@ public class PolyglotTranslaterJob extends PomTranslatorJob {
 	private Artifact findLatestExtensionFor(String pluginId, IProgressMonitor monitor) {
 		Artifact extension = new DefaultArtifact("io.takari.polyglot", pluginId, "0.1.12", null, "jar", "", null);
 		try {
-			String latestVersion = ArtifactSearcher.getLatestVersion(extension);
+			String latestVersion = ArtifactSearcher.getLatestVersion(extension, monitor);
 			if (latestVersion != null) {
 			  extension.setVersion(latestVersion);
 			}
