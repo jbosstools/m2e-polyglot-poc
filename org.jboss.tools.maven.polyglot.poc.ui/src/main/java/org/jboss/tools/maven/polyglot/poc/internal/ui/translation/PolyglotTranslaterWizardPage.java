@@ -66,7 +66,7 @@ public class PolyglotTranslaterWizardPage extends WizardPage {
 		gd_combo.widthHint = 100;
 		languagesCombo.setLayoutData(gd_combo);
 		languagesCombo.setItems(getLanguages());
-		languagesCombo.setText(languagesCombo.getItem(0));
+		languagesCombo.setText(Language.groovy.name());
 	}
 
 	private String[] getLanguages() {
@@ -76,4 +76,5 @@ public class PolyglotTranslaterWizardPage extends WizardPage {
 				.collect(Collectors.toList())
 				.toArray(new String[Language.values().length]);
 	}
+	
 }

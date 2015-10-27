@@ -22,6 +22,9 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.runtime.CoreException;
 
+/**
+ * @author Fred Bricon
+ */
 public class ModifiedPolyglotPomDetector implements IResourceDeltaVisitor {
 
 	private static final Pattern POLYGLOT_POM_PATTERN = Pattern.compile("^pom\\.(rb|groovy|yaml|scala|atom|js|kt|clj)$");

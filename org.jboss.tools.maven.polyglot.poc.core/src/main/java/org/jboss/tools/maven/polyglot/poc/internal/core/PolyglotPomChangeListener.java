@@ -23,6 +23,9 @@ import org.jboss.tools.maven.polyglot.poc.internal.core.preferences.IPolyglotPre
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author Fred Bricon
+ */
 @SuppressWarnings("restriction")
 public class PolyglotPomChangeListener implements IResourceChangeListener {
   

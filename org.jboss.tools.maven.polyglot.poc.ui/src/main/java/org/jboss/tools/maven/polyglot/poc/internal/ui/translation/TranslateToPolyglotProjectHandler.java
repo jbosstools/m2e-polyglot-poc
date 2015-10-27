@@ -15,6 +15,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -60,6 +61,8 @@ public class TranslateToPolyglotProjectHandler extends AbstractHandler {
 			Object o = ((IStructuredSelection)currentSelection).getFirstElement();
 			if (o instanceof IResource) {
 				return ((IResource)o).getProject();
+			} else if (o instanceof IAdaptable) {
+				return (IProject)((IAdaptable)o).getAdapter(IProject.class);
 			}
 		}
 		return null;

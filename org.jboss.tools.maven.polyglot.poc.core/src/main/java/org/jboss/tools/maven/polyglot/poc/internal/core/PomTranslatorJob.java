@@ -47,6 +47,9 @@ import org.eclipse.m2e.core.project.IMavenProjectRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author Fred Bricon
+ */
 @SuppressWarnings("restriction")
 public class PomTranslatorJob extends Job {
 
