@@ -25,3 +25,5 @@ Now that you've been warned, please read http://takari.io/2015/03/21/polyglot-ma
 This screencast shows you how to do it from within Eclipse directly : http://screencast.com/t/ls1In7Uq
 
 So if still want to have fun while loosing your original pom.xml files, you can install `M2E Polyglot Support Experiment` from this p2 update site : `http://dl.bintray.com/jbosstools/m2e-polyglot-poc/`
+
+This feature requires Java 1.8. If needed, you can edit your eclipse.ini (or the equivalent .ini configuration of your Eclipse based product) and add the -vm parameter, pointing at a JDK 1.8. See https://wiki.eclipse.org/Eclipse.ini#Specifying_the_JVM
