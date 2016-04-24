@@ -1,3 +1,6 @@
+
+[![Build Status](https://secure.travis-ci.org/Enide/polyglot-maven-m2e.png)](http://travis-ci.org/Enide/polyglot-maven-m2e)
+
 Proof of Concept POM Polyglot support for Eclipse M2E.
 
 [Maven 3.3.1](http://takari.io/2015/03/19/polyglot-maven.html) introduced the possibility of using other formats than xml to represent the project object model (POM).
