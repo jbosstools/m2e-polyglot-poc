@@ -62,8 +62,9 @@ public class PolyglotPomChangeListener implements IResourceChangeListener {
 
   protected void requestPomTranslation(List<IFile> poms) {
     if(poms != null && !poms.isEmpty()) {
+      final String version = preferences.get(IPolyglotPreferenceConstants.POLYGLOT_TRANSLATION_PLUGIN_VERSION, "").trim();
       LOG.debug("Automatic update of {}", poms);
-      new PomTranslatorJob(MavenPlugin.getMavenProjectRegistry(), MavenPluginActivator.getDefault().getMavenMarkerManager(), poms).schedule();
+      new PomTranslatorJob(MavenPlugin.getMavenProjectRegistry(), MavenPluginActivator.getDefault().getMavenMarkerManager(), poms, version).schedule();
     }
   }
 }

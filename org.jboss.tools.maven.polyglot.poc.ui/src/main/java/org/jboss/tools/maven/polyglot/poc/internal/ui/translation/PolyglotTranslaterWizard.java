@@ -19,6 +19,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
+import org.jboss.tools.maven.polyglot.poc.internal.core.preferences.IPolyglotPreferenceConstants;
+import org.jboss.tools.maven.polyglot.poc.internal.ui.PolyglotSupportUIActivator;
 
 /**
  * @author Fred Bricon
@@ -41,6 +43,9 @@ public class PolyglotTranslaterWizard extends Wizard {
 
 	@Override
 	public boolean performFinish() {
+		final String versionOrNull = PolyglotSupportUIActivator.getDefault().getPreferenceStore().getString(IPolyglotPreferenceConstants.POLYGLOT_TRANSLATION_PLUGIN_VERSION);
+	    final String version = versionOrNull == null ? "" : versionOrNull.trim();
+		
 		final Language language = translaterPage.getLanguage();
 		final boolean isAddExtension = translaterPage.isAddExtension();
 		final File mvnExtensionsDir = translaterPage.getMvnExtensionsDir(); 
@@ -49,8 +54,8 @@ public class PolyglotTranslaterWizard extends Wizard {
 				monitor.beginTask("Project Translation", 3);
 				try {
 					// No, this is not how Jobs are supposed to be used
-					IStatus result = new PolyglotTranslaterJob(facade, language, isAddExtension,
-							mvnExtensionsDir).run(monitor);
+					final IStatus result = new PolyglotTranslaterJob(facade, language, isAddExtension, mvnExtensionsDir, version)
+							.run(monitor);
 					if (!result.isOK()) {
 						throw new InvocationTargetException(result.getException());
 					}

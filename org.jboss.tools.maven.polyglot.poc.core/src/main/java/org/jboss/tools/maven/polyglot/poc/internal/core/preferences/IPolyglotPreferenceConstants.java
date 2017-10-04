@@ -18,5 +18,7 @@ package org.jboss.tools.maven.polyglot.poc.internal.core.preferences;
 public interface IPolyglotPreferenceConstants {
 
 	String ENABLE_AUTOMATIC_POM_TRANSLATION = "polyglot.maven.autoPomTranslation";
+	
+	String POLYGLOT_TRANSLATION_PLUGIN_VERSION = "polyglot.maven.translationPluginVersion";
 
 }
