@@ -65,17 +65,20 @@ public class PomTranslatorJob extends Job {
 
   private IMavenMarkerManager markerManager;
 
+  final private String translatePluginVersion;
+
   
-  public PomTranslatorJob(List<IFile> poms) {
-	  this(MavenPlugin.getMavenProjectRegistry(), MavenPluginActivator.getDefault().getMavenMarkerManager(), poms);
+  public PomTranslatorJob(List<IFile> poms, String translatePluginVersion) {
+	  this(MavenPlugin.getMavenProjectRegistry(), MavenPluginActivator.getDefault().getMavenMarkerManager(), poms, translatePluginVersion);
   }
   
-  public PomTranslatorJob(IMavenProjectRegistry projectManager, IMavenMarkerManager markerManager, List<IFile> poms) {
+  public PomTranslatorJob(IMavenProjectRegistry projectManager, IMavenMarkerManager markerManager, List<IFile> poms, String translatePluginVersion) {
     super("Pom translator");
     Assert.isNotNull(poms);
     this.projectManager = projectManager;
     this.markerManager = markerManager;
     this.poms = new ArrayList<>(poms);
+    this.translatePluginVersion = translatePluginVersion;
   }
 
   @Override
@@ -140,7 +143,10 @@ public class PomTranslatorJob extends Job {
     final MavenExecutionRequest request = context.getExecutionRequest();
     File pomFile = pom.getRawLocation().toFile();
     request.setBaseDirectory(pomFile.getParentFile());
-    request.setGoals(Arrays.asList("io.takari.polyglot:polyglot-translate-plugin:translate"));
+	final String pluginTargetLine = "io.takari.polyglot:polyglot-translate-plugin" +
+			(translatePluginVersion.isEmpty() ? "" : ":" + translatePluginVersion) +
+			":translate";
+	request.setGoals(Arrays.asList(pluginTargetLine));
     request.setUpdateSnapshots(false);
     Properties props = new Properties();
     props.put("input", input.getRawLocation().toOSString());

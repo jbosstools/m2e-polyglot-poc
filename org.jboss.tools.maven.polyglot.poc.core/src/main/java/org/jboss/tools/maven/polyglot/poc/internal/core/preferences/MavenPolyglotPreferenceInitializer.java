@@ -15,7 +15,6 @@ import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.jboss.tools.maven.polyglot.poc.internal.core.PolyglotSupportActivator;
 
-
 /**
  * Preferences initializer.
  * 
@@ -24,12 +23,13 @@ import org.jboss.tools.maven.polyglot.poc.internal.core.PolyglotSupportActivator
 public class MavenPolyglotPreferenceInitializer extends AbstractPreferenceInitializer {
 
 	/**
-	   * @see org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#initializeDefaultPreferences()
-	   */
-	  @Override
-	  public void initializeDefaultPreferences() {
-	    IEclipsePreferences store = DefaultScope.INSTANCE.getNode(PolyglotSupportActivator.PLUGIN_ID);
-	    store.putBoolean(IPolyglotPreferenceConstants.ENABLE_AUTOMATIC_POM_TRANSLATION, true);
-	  }
+	 * @see org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#initializeDefaultPreferences()
+	 */
+	@Override
+	public void initializeDefaultPreferences() {
+		final IEclipsePreferences store = DefaultScope.INSTANCE.getNode(PolyglotSupportActivator.PLUGIN_ID);
+		store.putBoolean(IPolyglotPreferenceConstants.ENABLE_AUTOMATIC_POM_TRANSLATION, true);
+		store.put(IPolyglotPreferenceConstants.POLYGLOT_TRANSLATION_PLUGIN_VERSION, "");
+	}
 
 }

@@ -36,6 +36,7 @@ public class PolyglotSupportUIActivator extends Plugin implements IStartup {
 		super.start(context);
 		//forces activation of core plugin
 		getPreferenceStore().getBoolean(IPolyglotPreferenceConstants.ENABLE_AUTOMATIC_POM_TRANSLATION);
+		getPreferenceStore().getString(IPolyglotPreferenceConstants.POLYGLOT_TRANSLATION_PLUGIN_VERSION);
 		plugin  = this;
 	}
 

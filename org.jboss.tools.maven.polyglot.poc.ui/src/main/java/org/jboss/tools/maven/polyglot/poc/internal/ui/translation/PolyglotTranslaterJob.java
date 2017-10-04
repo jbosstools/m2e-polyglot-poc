@@ -53,8 +53,8 @@ public class PolyglotTranslaterJob extends PomTranslatorJob {
 	private boolean addExtension;
 	private File mvnExtensionsDir;
 
-	public PolyglotTranslaterJob(IMavenProjectFacade facade, Language language, boolean addExtension, File mvnExtensionsDir) {
-		super(Collections.singletonList(facade.getPom()));
+	public PolyglotTranslaterJob(IMavenProjectFacade facade, Language language, boolean addExtension, File mvnExtensionsDir, String translatePluginVersion) {
+		super(Collections.singletonList(facade.getPom()), translatePluginVersion);
 		this.facade = facade;
 		this.language = language;
 		this.addExtension = addExtension;

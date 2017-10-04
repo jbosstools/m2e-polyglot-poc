@@ -12,6 +12,7 @@ package org.jboss.tools.maven.polyglot.poc.internal.ui.preferences;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.jboss.tools.maven.polyglot.poc.internal.core.preferences.IPolyglotPreferenceConstants;
@@ -34,7 +35,10 @@ public class MavenPolyglotPreferencePage extends FieldEditorPreferencePage imple
 	    addField(new BooleanFieldEditor(IPolyglotPreferenceConstants.ENABLE_AUTOMATIC_POM_TRANSLATION, 
 	    		                        "Enable automatic polyglot pom translation. pom.xml will be overwritten!",
 	        getFieldEditorParent()));
-	  }
+		addField(new StringFieldEditor(IPolyglotPreferenceConstants.POLYGLOT_TRANSLATION_PLUGIN_VERSION,
+				"Optional version of the polyglot-translate-plugin",
+				getFieldEditorParent()));
+	}
 
 		@Override
 		public boolean performOk() {
