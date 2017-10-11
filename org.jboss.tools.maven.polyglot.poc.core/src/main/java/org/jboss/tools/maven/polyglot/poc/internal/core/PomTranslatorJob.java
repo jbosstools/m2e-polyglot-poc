@@ -11,6 +11,8 @@
 package org.jboss.tools.maven.polyglot.poc.internal.core;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,6 +26,7 @@ import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenExecutionResult;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -100,11 +103,17 @@ public class PomTranslatorJob extends Job {
 
     IProject project = input.getProject();
     IFile pomXml = project.getFile(IMavenConstants.POM_FILE_NAME);
+    IPath buildFolder;
+    if (pomXml.exists()) {
+	    	IMavenProjectFacade facade = projectManager.create(pomXml, true, monitor);
+	    	MavenProject mavenProject = facade.getMavenProject(monitor);
+	    	buildFolder = facade.getProjectRelativePath(mavenProject.getBuild().getDirectory());
+    } else {
+    		//In case where pom.xml doesn't exist, fall back to default target folder
+    		buildFolder = project.getFolder("target").getProjectRelativePath();
+    }
 
-    IMavenProjectFacade facade = projectManager.create(pomXml, true, monitor);
-    MavenProject mavenProject = facade.getMavenProject(monitor);
-
-    IPath polyglotFolder = facade.getProjectRelativePath(mavenProject.getBuild().getDirectory()).append("polyglot");
+    IPath polyglotFolder = buildFolder.append("polyglot");
     IFile output = project.getFolder(polyglotFolder).getFile(IMavenConstants.POM_FILE_NAME);
     MavenExecutionResult result = translate(pomXml, input, output, monitor);
     if (result.hasExceptions()) {
@@ -113,10 +122,18 @@ public class PomTranslatorJob extends Job {
     } 
     
     if (output.exists()) {
-      pomXml.setContents(output.getContents(), true, true, monitor);
-        if (!pomXml.isDerived()) {
-          pomXml.setDerived(true, monitor);
-        }
+    	  try (InputStream content = output.getContents()) {
+    		  if (pomXml.exists()) {
+    			  pomXml.setContents(content, true, true, monitor);
+    		  } else {
+    			  pomXml.create(content, true, monitor);
+    		  }
+    		  if (!pomXml.isDerived()) {
+    			  pomXml.setDerived(true, monitor);
+    		  }
+    	  } catch (IOException e) {
+    		  throw new CoreException(new Status(IStatus.ERROR, PolyglotSupportActivator.PLUGIN_ID, "Unable to write to pom.xml", e));
+	  }
     }
   }
 
