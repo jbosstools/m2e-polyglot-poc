@@ -8,10 +8,6 @@
   <name>${projectName} :: parent</name>
   <description>${projectName}</description>
 
-  <prerequisites>
-    <maven>3.0</maven>
-  </prerequisites>
-
   <properties>
     <projectName>M2E Polyglot Support Experiment</projectName>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
